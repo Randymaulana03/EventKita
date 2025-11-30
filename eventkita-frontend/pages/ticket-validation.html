@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Validasi Tiket Organizer</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        /* Palet Warna Baru */
+        :root {
+            --primary: #007bff; /* Biru Primer yang Kuat */
+            --success: #28a745; /* Hijau untuk Sukses */
+            --error: #dc3545; /* Merah untuk Error */
+            --info: #17a2b8; /* Biru Muda untuk Info/Loading */
+            --light-bg: #f8f9fa; /* Latar Belakang Halaman */
+            --card-bg: #ffffff; /* Latar Belakang Kartu/Form */
+            --text-color: #343a40;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: Arial, sans-serif;
+            color: var(--text-color);
+        }
+        .logo {
+          font-size: 1.6rem;
+          font-weight: 700;
+          color: #6f5bff;
+        }
+
+        .topnav {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        .topnav a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .topnav button {
+            background-color: var(--error);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .container { 
+            max-width: 700px; /* LEBAR DIPERBARUI */
+            margin: 30px auto; 
+            padding: 20px; 
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 25px;
+        }
+        
+        /* Area Form Input */
+        .validation-form { 
+            background: var(--card-bg); 
+            padding: 25px; 
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        textarea#qrCode {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            height: 120px;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: monospace;
+            transition: border-color 0.3s;
+        }
+        textarea#qrCode:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 5px;
+            transition: background-color 0.3s;
+        }
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        /* Area Hasil Validasi */
+        .result {
+            margin-top: 30px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+        .result.success {
+            background-color: var(--success);
+            color: white;
+        }
+        .result.error {
+            background-color: var(--error);
+            color: white;
+        }
+        .result.info {
+            background-color: var(--info);
+            color: white;
+        }
+
+        /* Detail Booking */
+        #bookingDetails {
+            margin-top: 20px;
+        }
+        .booking-details {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary);
+        }
+        .booking-details h3 {
+            color: var(--primary);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+            font-size: 1.3em;
+        }
+        .booking-details p {
+            margin: 10px 0;
+            line-height: 1.4;
+            display: flex;
+            justify-content: space-between;
+        }
+        .booking-details p strong {
+            font-weight: 600;
+        }
+        .qr-display {
+            background: #eee;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 15px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="topnav">
+        <div class="logo">EventKita</div>
+        <div><button onclick="logout()">Logout</button></div>
+    </nav>
+
+    <div class="container">
+        <h2>Scan Tiket Acara</h2>
+        
+        <div class="validation-form">
+            <form id="qrValidationForm" onsubmit="event.preventDefault(); validateByQRCode();">
+                <div class="form-group">
+                    <label for="qrCode">Pindai atau Tempel Data QR Code di sini:</label>
+                    <textarea 
+                        id="qrCode" 
+                        placeholder="Scan atau Tempel Kode QR:" 
+                        autofocus 
+                        oninput="clearResults()"
+                    ></textarea>
+                </div>
+                <button type="submit">Validasi Tiket</button>
+            </form>
+        </div>
+
+        <div id="result" class="result">
+            <p id="resultMessage"></p>
+        </div>
+
+        <div id="bookingDetails" style="display: none;">
+            <div class="booking-details">
+                <h3>Detail Tiket</h3>
+                <p><strong>Nama Event:</strong> <span id="detailEventTitle"></span></p>
+                <p><strong>Jumlah Tiket:</strong> <span id="detailQuantity"></span></p>
+                <p><strong>Total Bayar(Rp):</strong> <span id="detailTotal"></span></p>
+                <p><strong>Status Tiket:</strong> <span id="detailStatus"></span></p>
+                <p><strong>Tgl. Bayar:</strong> <span id="detailPaid"></span></p>
+                
+                <div class="qr-display">
+                    <strong>Kode QR Lengkap:</strong><br>
+                    <span id="detailQRCode"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="back-link">
+            <a href="organizer.html">Kembali ke Dashboard</a>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        // Manual auth check
+        function checkAuthManual() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            if (!token || !user) {
+                window.location.href = 'login-organizer.html';
+                return false;
+            }
+            return true;
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('role');
+            window.location.href = 'login.html';
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            console.log('Validasi Tiket page loaded');
+            if (!checkAuthManual()) {
+                return;
+            }
+            // Pastikan textarea QR Code fokus saat halaman dimuat
+            document.getElementById('qrCode').focus(); 
+        };
+
+        // Validate by QR Code - use new backend endpoint /bookings/qr/{qrCode}
+        async function validateByQRCode() {
+            // Bersihkan hasil sebelumnya saat tombol ditekan
+            clearResults(); 
+            const qrCodeInput = document.getElementById('qrCode');
+            const qrCode = qrCodeInput.value.trim();
+
+            if (!qrCode) {
+                showResult('Masukkan atau scan QR Code terlebih dahulu', 'error');
+                return;
+            }
+
+            try {
+                const apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : 'http://localhost:8888/api');
+                console.log('Validating QR Code:', qrCode);
+                showResult('⏳ Sedang memvalidasi tiket...', 'info');
+
+                // Call booking-by-qr endpoint directly and handle non-JSON responses safely
+                const res = await fetch(apiBase + `/bookings/qr/${encodeURIComponent(qrCode)}`);
+                const resText = await res.text();
+
+                if (!res.ok) {
+                    if (res.status === 404) {
+                        showResult('❌ Maaf, tiket TIDAK VALID. QR Code tidak ditemukan.', 'error');
+                    } else {
+                        // Coba parse error response jika memungkinkan
+                        let errorMessage = resText;
+                        try {
+                             const errorJson = JSON.parse(resText);
+                             if (errorJson.message) {
+                                errorMessage = errorJson.message;
+                             }
+                        } catch(e) { /* ignore parse error */ }
+                        showResult('❌ Gagal memvalidasi tiket: ' + errorMessage, 'error');
+                    }
+                    console.error('Booking lookup failed:', res.status, resText);
+                    return;
+                }
+
+                let booking;
+                try {
+                    booking = JSON.parse(resText);
+                } catch (parseErr) {
+                    console.warn('Booking lookup returned non-JSON response:', resText);
+                    showResult('❌ Respon server tidak terduga.', 'error');
+                    return;
+                }
+                console.log('Booking found by QR:', booking);
+                
+                // Pastikan status PAID
+                if (booking.status !== 'PAID') {
+                    showResult('❌ Tiket **BELUM DIBAYAR**. Status: ' + booking.status, 'error');
+                    displayBookingDetails(booking);
+                    // Kosongkan input
+                    qrCodeInput.value = '';
+                    qrCodeInput.focus();
+                    return;
+                }
+                
+                // VALIDASI SUKSES
+                showResult('VALID! Selamat menikmati acara kami! Tiket anda sah.', 'success');
+                displayBookingDetails(booking);
+                
+                // Kosongkan input setelah validasi sukses atau error
+                qrCodeInput.value = '';
+                qrCodeInput.focus();
+
+            } catch (error) {
+                console.error('Error validating QR code:', error);
+                showResult('❌ Terjadi kesalahan sistem: ' + (error.message || error), 'error');
+                
+                // Kosongkan input
+                qrCodeInput.value = '';
+                qrCodeInput.focus();
+            }
+        }
+
+        // Display booking details
+        function displayBookingDetails(booking) {
+            document.getElementById('detailEventTitle').innerText = booking.eventTitle || 'N/A';
+            document.getElementById('detailQuantity').innerText = booking.quantity || 1;
+            document.getElementById('detailTotal').innerText = (booking.totalAmount || 0).toLocaleString('id-ID'); 
+            document.getElementById('detailStatus').innerText = booking.status;
+            document.getElementById('detailPaid').innerText = booking.paidAt ? new Date(booking.paidAt).toLocaleString('id-ID') : 'Belum dibayar';
+            document.getElementById('detailQRCode').innerText = booking.qrCode || 'Tidak ada';
+            
+            document.getElementById('bookingDetails').style.display = 'block';
+        }
+
+        // Show result message
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            const messageSpan = document.getElementById('resultMessage');
+            
+            resultDiv.className = 'result ' + type;
+            messageSpan.innerHTML = message; 
+            resultDiv.style.display = 'block';
+            
+            // Scroll to result
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Clear results
+        function clearResults() {
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('bookingDetails').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

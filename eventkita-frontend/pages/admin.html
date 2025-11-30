@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body onload="initAdmin()">
+  <nav class="topnav">
+    <div>Admin</div>
+    <div><button onclick="logout()">Logout</button></div>
+  </nav>
+
+  <div class="container">
+    <h2>Overview</h2>
+    <div id="overview"></div>
+    <h3>Recent Bookings</h3>
+    <div id="recent"></div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/guard.js"></script>
+  <script>
+    async function initAdmin(){
+      if(!requireLogin(['ADMIN'])) return;
+      const stats = await apiGet('/admin/summary', true);
+      document.getElementById('overview').innerHTML = `
+        <p>Total Users: ${stats.totalUsers || 0}</p>
+        <p>Total Events: ${stats.totalEvents || 0}</p>
+        <p>Total Bookings: ${stats.totalBookings || 0}</p>
+        <p>Revenue: Rp ${stats.revenue || 0}</p>
+      `;
+      const recent = await apiGet('/admin/bookings/recent', true);
+      const wrap = document.getElementById('recent');
+      (recent || []).forEach(r => {
+        wrap.innerHTML += `<div class="event-card"><b>${r.id}</b> ${r.userEmail || r.user?.email || ''} - ${r.status}</div>`;
+      });
+    }
+  </script>
+</body>
+</html>

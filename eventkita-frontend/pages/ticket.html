@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>E-Ticket</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body onload="initTicket()">
+  <nav class="topnav">
+    <div><a href="user-dashboard.html">← Back</a></div>
+    <div><button onclick="logout()">Logout</button></div>
+  </nav>
+
+  <div class="container">
+    <h2>E-Ticket</h2>
+    <p><strong>Event:</strong> <span id="tEvent"></span></p>
+    <p><strong>Booking Code:</strong> <span id="tCode"></span></p>
+    <div id="qrWrap">
+      <img id="tQr" alt="QR Code" />
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/guard.js"></script>
+  <script>
+    async function initTicket(){
+      if(!requireLogin()) return;
+      const p = new URLSearchParams(window.location.search);
+      const bookingId = p.get('bookingId');
+      const t = await apiGet(`/booking/ticket/${bookingId}`, true);
+      document.getElementById('tEvent').innerText = t.eventName || t.event.title || '';
+      document.getElementById('tCode').innerText = t.bookingCode || t.qrCode || '';
+      // assume t.qrCodeUrl or t.qrUrl available from backend
+      document.getElementById('tQr').src = t.qrCodeUrl || t.qrUrl || (`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(t.bookingCode||t.qrCode||'')}`);
+    }
+  </script>
+</body>
+</html>

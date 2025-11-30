@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>EventKita — Login Admin</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="auth-card">
+    <h2>Login Admin</h2>
+    <p class="muted">Login sebagai administrator sistem</p>
+
+    <label>Email</label>
+    <input id="loginEmail" type="email" placeholder="email@example.com">
+
+    <label>Password</label>
+    <input id="loginPassword" type="password" placeholder="password">
+
+    <input type="hidden" id="loginRole" value="ADMIN">
+
+    <button id="btnLogin">Login sebagai Admin</button>
+    
+    <div class="auth-links">
+      <p class="muted">
+        <a href="login.html">Login sebagai Peserta</a> • 
+        <a href="login-organizer.html">Login sebagai Organizer</a>
+      </p>
+    </div>
+    
+    <p id="loginMsg" class="muted"></p>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('btnLogin').addEventListener('click', async () => {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        const role = document.getElementById('loginRole').value; // Selalu "ADMIN"
+
+        try {
+          const res = await login(email, password, role);
+          
+          if (res.error) {
+            document.getElementById('loginMsg').innerText = res.error;
+            return;
+          }
+          
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('role', res.role);
+          localStorage.setItem('user', JSON.stringify(res));
+
+          window.location.href = 'admin-dashboard.html';
+          
+        } catch (error) {
+          document.getElementById('loginMsg').innerText = 'Login failed: ' + error.message;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
