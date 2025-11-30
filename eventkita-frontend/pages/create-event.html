@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>EventKita — Buat Event Baru</title>
+    <style>
+        /* Palet Warna Baru */
+        :root {
+            --primary-color: #007bff; /* Biru Profesional Baru */
+            --primary-light: #6aa8ff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745; /* Tetap pakai hijau untuk Save/Sukses */
+            --background-light: #f4f7f6;
+            --text-dark: #333;
+            --text-muted: #666;
+            --border-color: #e0e6ed;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-focus: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-light);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            padding: 2rem 1rem;
+        }
+
+        /* --- Navigation Bar (diperbaiki) --- */
+        .topnav {
+            background-color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-brand {
+            font-size: 1.2rem;
+            color: var(--text-dark);
+        }
+
+        .nav-brand span {
+            font-weight: 600;
+        }
+
+        .nav-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* --- Header (diperbaiki) --- */
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #0093ff 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2.5rem !important;
+            box-shadow: var(--shadow-light);
+        }
+
+        .user-welcome {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* --- Form Container & Section --- */
+        .form-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-light);
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.8rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-sizing: border-box; /* Penting untuk padding yang konsisten */
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-focus);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* --- Price Input Styling --- */
+        .price-input {
+            position: relative;
+        }
+        
+        .price-input:before {
+            content: "Rp";
+            position: absolute;
+            left: 1rem; /* disesuaikan dengan padding input */
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        
+        .price-input input {
+            padding-left: 3.5rem; /* Memberi ruang untuk 'Rp' */
+        }
+
+        /* --- Checkbox Styling --- */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+            border-color: var(--border-color);
+            cursor: pointer;
+            accent-color: var(--primary-color); /* Warna centang */
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0; /* Override label default margin */
+            font-weight: normal !important;
+            font-size: 1rem;
+            color: var(--text-dark);
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 0.4rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* --- Character Counter --- */
+        .character-count {
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        .character-count.warning {
+            color: #dc3545; /* Merah untuk peringatan */
+            font-weight: bold;
+        }
+        
+        /* --- Preview Section --- */
+        .preview-section {
+            background: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .preview-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        /* Styling Pratinjau Event Card */
+        #eventPreview > div {
+            border: 1px solid #ddd; 
+            border-left: 5px solid var(--primary-color); /* Aksen warna */
+            border-radius: 8px; 
+            padding: 1.2rem; 
+            background: white; 
+            transition: all 0.3s;
+        }
+
+        #eventPreview h3 {
+            margin: 0 0 0.5rem 0; 
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        #eventPreview p {
+            margin: 0 0 1rem 0; 
+            color: var(--text-muted); 
+            font-size: 0.95rem;
+        }
+
+        #eventPreview .event-meta {
+            display: flex; 
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.85rem; 
+            color: #555;
+            margin-top: 1rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed #eee;
+        }
+
+        /* --- Form Actions & Buttons --- */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .btn-save,
+        .btn-cancel {
+            border: none;
+            padding: 0.8rem 2.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-save {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-cancel {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-save:hover {
+            background: #218838;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+        }
+        
+        .btn-cancel:hover {
+            background: #5a6268;
+        }
+
+        /* --- Ticket Types Container --- */
+        .ticket-types-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .ticket-type-option {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.2rem;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .ticket-type-option:has(input[type="checkbox"]:checked) {
+            border-color: var(--primary-color);
+            background: #e7f3ff;
+        }
+        
+        .ticket-checkbox {
+            margin-bottom: 1rem;
+        }
+        
+        .ticket-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .ticket-checkbox label {
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+        
+        .ticket-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-left: 1.5rem;
+        }
+        
+        .ticket-inputs .form-group {
+            margin-bottom: 0;
+        }
+        
+        .ticket-inputs input:disabled {
+            background: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        /* --- Media Query untuk Responsivitas --- */
+        @media (max-width: 768px) {
+            .form-row,
+            .ticket-inputs {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="topnav">
+        <div class="nav-brand">
+            <span style="color: var(--primary-color);">EventKita</span>
+            • <span style="font-weight: normal;">Buat Event Baru</span>
+        </div>
+        <div class="nav-actions">
+            <button class="nav-btn" onclick="location.href='organizer.html'">← Kembali ke Dashboard</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-container">
+            <div class="dashboard-header">
+                <div class="user-welcome">Buat Event Baru</div>
+                <div class="user-subtitle">Isi form berikut untuk membuat event yang menarik</div>
+            </div>
+
+            <form id="eventForm">
+                <div class="form-section">
+                    <div class="section-title">📝 Informasi Dasar Event</div>
+                    
+                    <div class="form-group">
+                        <label for="eventName">Nama Event <span style="color: #dc3545;">*</span></label>
+                        <input type="text" id="eventName" placeholder="Contoh: Tech Conference 2024" required maxlength="100">
+                        <div class="character-count" id="nameCount">0/100 karakter</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="eventDescription">Deskripsi Event <span style="color: #dc3545;">*</span></label>
+                        <textarea id="eventDescription" placeholder="Jelaskan detail event Anda..." required maxlength="500"></textarea>
+                        <div class="character-count" id="descCount">0/500 karakter</div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="eventCategory">Kategori <span style="color: #dc3545;">*</span></label>
+                            <select id="eventCategory" required>
+                                <option value="">Pilih Kategori</option>
+                                <option value="CONCERT">🎵 Concert</option>
+                                <option value="CONFERENCE">💼 Conference</option>
+                                <option value="WORKSHOP">🔧 Workshop</option>
+                                <option value="SEMINAR">🎓 Seminar</option>
+                                <option value="FESTIVAL">🎉 Festival</option>
+                                <option value="SPORTS">⚽ Sports</option>
+                                <option value="EXHIBITION">🖼️ Exhibition</option>
+                                <option value="NETWORKING">🤝 Networking</option>
+                                <option value="OTHER">📌 Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="eventStatus">Status Event <span style="color: #dc3545;">*</span></label>
+                            <select id="eventStatus" required>
+                                <option value="DRAFT">📝 Draft (Simpan sementara)</option>
+                                <option value="PUBLISHED">🚀 Published (Tampilkan ke publik)</option>
+                            </select>
+                            <small>Pilih "Draft" untuk menyimpan sementara, "Published" untuk langsung tampil ke peserta</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">📅 Tanggal & Lokasi</div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="eventDate">Tanggal Mulai <span style="color: #dc3545;">*</span></label>
+                            <input type="date" id="eventDate" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="startTime">Waktu Mulai <span style="color: #dc3545;">*</span></label>
+                            <input type="time" id="startTime" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="endDate">Tanggal Selesai <span style="color: #dc3545;">*</span></label>
+                            <input type="date" id="endDate" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="endTime">Waktu Selesai <span style="color: #dc3545;">*</span></label>
+                            <input type="time" id="endTime" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="eventLocation">Lokasi Event <span style="color: #dc3545;">*</span></label>
+                        <input type="text" id="eventLocation" placeholder="Alamat lengkap" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">🎫 Tiket & Kapasitas</div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="maxParticipants">Maksimal Peserta</label>
+                            <input type="number" id="maxParticipants" placeholder="0 untuk unlimited" min="0">
+                            <small>Jumlah maksimum peserta yang bisa mendaftar</small>
+                        </div>
+                        
+                        <div class="form-group price-input">
+                            <label for="eventPrice">Harga Tiket (Rp)</label>
+                            <input type="number" id="eventPrice" placeholder="0 untuk gratis" min="0" step="1000">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="requireApproval">
+                            <label for="requireApproval">Butuh persetujuan untuk pendaftaran</label>
+                        </div>
+                        <small>Jika dicentang, peserta harus menunggu persetujuan Anda setelah mendaftar</small>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">🎟️ Tipe Tiket yang Tersedia</div>
+                    <small style="display: block; margin-bottom: 1rem; color: var(--text-muted);">
+                        Pilih tipe tiket yang ingin Anda sediakan beserta harga dan kuota masing-masing
+                    </small>
+                    
+                    <div class="ticket-types-container">
+                        <div class="ticket-type-option">
+                            <div class="ticket-checkbox">
+                                <input type="checkbox" id="ticketRegular" checked>
+                                <label for="ticketRegular"><strong>REGULAR</strong></label>
+                            </div>
+                            <div class="ticket-inputs">
+                                <div class="form-group">
+                                    <label for="priceRegular">Harga (Rp)</label>
+                                    <input type="number" id="priceRegular" placeholder="50000" min="0" step="1000" value="50000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="quotaRegular">Kuota</label>
+                                    <input type="number" id="quotaRegular" placeholder="100" min="1" value="100">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="ticket-type-option">
+                            <div class="ticket-checkbox">
+                                <input type="checkbox" id="ticketVip">
+                                <label for="ticketVip"><strong>VIP</strong></label>
+                            </div>
+                            <div class="ticket-inputs">
+                                <div class="form-group">
+                                    <label for="priceVip">Harga (Rp)</label>
+                                    <input type="number" id="priceVip" placeholder="100000" min="0" step="1000" value="100000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="quotaVip">Kuota</label>
+                                    <input type="number" id="quotaVip" placeholder="50" min="1" value="50">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="ticket-type-option">
+                            <div class="ticket-checkbox">
+                                <input type="checkbox" id="ticketVvip">
+                                <label for="ticketVvip"><strong>VVIP</strong></label>
+                            </div>
+                            <div class="ticket-inputs">
+                                <div class="form-group">
+                                    <label for="priceVvip">Harga (Rp)</label>
+                                    <input type="number" id="priceVvip" placeholder="200000" min="0" step="1000" value="200000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="quotaVvip">Kuota</label>
+                                    <input type="number" id="quotaVvip" placeholder="20" min="1" value="20">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">📋 Informasi Tambahan</div>
+                    
+                    <div class="form-group">
+                        <label for="eventTags">Tags (pisahkan dengan koma)</label>
+                        <input type="text" id="eventTags" placeholder="contoh: technology, conference, startup">
+                        <small>Membantu peserta menemukan event Anda di halaman pencarian</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contactInfo">Kontak Informasi</label>
+                        <input type="text" id="contactInfo" placeholder="Email/WA untuk pertanyaan dari peserta">
+                        <small>Kontak ini akan ditampilkan di halaman detail event</small>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">👁️ Preview Event Card</div>
+                    <div class="preview-section">
+                        <div class="preview-title">Pratinjau Event Card Anda:</div>
+                        <div id="eventPreview">
+                            <p style="color: var(--text-muted); font-style: italic;">Isi form untuk melihat pratinjau...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="location.href='organizer.html'">Batal</button>
+                    <button type="button" class="btn-save" onclick="if(validateDateTime()) createNewEvent()">🚀 Buat Event</button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        // Use a local alias so we don't collide with other globals named API_BASE
+        const LOCAL_API_BASE = (typeof API_BASE !== 'undefined') ? API_BASE : 'http://localhost:8888/api';
+
+        // Toggle ticket inputs based on checkbox
+        function toggleTicketInputs(ticketType) {
+            const checkbox = document.getElementById(`ticket${ticketType}`);
+            const priceInput = document.getElementById(`price${ticketType}`);
+            const quotaInput = document.getElementById(`quota${ticketType}`);
+            
+            if (checkbox.checked) {
+                priceInput.disabled = false;
+                quotaInput.disabled = false;
+            } else {
+                priceInput.disabled = true;
+                quotaInput.disabled = true;
+            }
+        }
+        
+        // Initialize ticket checkboxes
+        document.addEventListener('DOMContentLoaded', function() {
+            ['Regular', 'Vip', 'Vvip'].forEach(type => {
+                const checkbox = document.getElementById(`ticket${type}`);
+                checkbox.addEventListener('change', () => toggleTicketInputs(type));
+                toggleTicketInputs(type); // Set initial state
+            });
+        });
+
+        // Category icons mapping sesuai enum
+        const categoryIcons = {
+        'CONCERT': '🎵', 
+        'CONFERENCE': '💼', 
+        'WORKSHOP': '🔧', 
+        'SEMINAR': '🎓',
+        'FESTIVAL': '🎉', 
+        'SPORTS': '⚽', 
+        'EXHIBITION': '🖼️', 
+        'NETWORKING': '🤝',
+        'OTHER': '📌'
+    };
+
+    // ✅ TAMBAHKAN INI - Category labels untuk display
+    const categoryLabels = {
+        'CONCERT': 'Konser', 
+        'CONFERENCE': 'Konferensi', 
+        'WORKSHOP': 'Workshop', 
+        'SEMINAR': 'Seminar',
+        'FESTIVAL': 'Festival', 
+        'SPORTS': 'Olahraga', 
+        'EXHIBITION': 'Pameran', 
+        'NETWORKING': 'Networking',
+        'OTHER': 'Lainnya'
+    };
+
+    // Status icons and labels
+    const statusIcons = {
+        'DRAFT': '📝',
+        'PUBLISHED': '🚀', 
+        'ONGOING': '🟢',
+        'COMPLETED': '✅',
+        'CANCELLED': '❌'
+    };
+
+    // ✅ TAMBAHKAN INI - Status labels untuk display
+    const statusLabels = {
+        'DRAFT': 'Draft',
+        'PUBLISHED': 'Published',
+        'ONGOING': 'Sedang Berlangsung', 
+        'COMPLETED': 'Selesai',
+        'CANCELLED': 'Dibatalkan'
+    };
+
+        // Character counters
+        document.getElementById('eventName').addEventListener('input', function() {
+            const count = this.value.length;
+            const counter = document.getElementById('nameCount');
+            counter.textContent = `${count}/100 karakter`;
+            if (count > 90) counter.classList.add('warning');
+            else counter.classList.remove('warning');
+            updatePreview();
+        });
+
+        document.getElementById('eventDescription').addEventListener('input', function() {
+            const count = this.value.length;
+            const counter = document.getElementById('descCount');
+            counter.textContent = `${count}/500 karakter`;
+            if (count > 450) counter.classList.add('warning');
+            else counter.classList.remove('warning');
+            updatePreview();
+        });
+
+        // Auto-set end date/time when start date/time changes
+        document.getElementById('eventDate').addEventListener('change', function() {
+            const endDate = document.getElementById('endDate');
+            if (!endDate.value) {
+                endDate.value = this.value;
+            }
+            updatePreview();
+        });
+
+        document.getElementById('startTime').addEventListener('change', function() {
+            const endTime = document.getElementById('endTime');
+            if (!endTime.value) {
+                // Set end time to 2 hours after start time
+                const [hours, minutes] = this.value.split(':');
+                let endHours = parseInt(hours) + 2;
+                if (endHours > 23) endHours = 23;
+                endTime.value = `${endHours.toString().padStart(2, '0')}:${minutes}`;
+            }
+            updatePreview();
+        });
+
+        // Real-time preview
+        window.updatePreview = function() {
+        // ... (Kode updatePreview Anda yang sudah benar) ...
+        const title = document.getElementById('eventName').value || 'Nama Event Belum Diisi';
+        const desc = document.getElementById('eventDescription').value || 'Deskripsi event akan muncul di sini...';
+        const category = document.getElementById('eventCategory').value;
+        const status = document.getElementById('eventStatus').value;
+        const startDate = document.getElementById('eventDate').value;
+        const startTime = document.getElementById('startTime').value;
+        const endDate = document.getElementById('endDate').value;
+        const endTime = document.getElementById('endTime').value;
+        const location = document.getElementById('eventLocation').value || 'Lokasi Event';
+        const price = document.getElementById('eventPrice').value || '0';
+        
+        const categoryIcon = categoryIcons[category] || '📦';
+        const categoryLabel = categoryLabels[category] || 'Kategori';
+        const statusIcon = statusIcons[status] || '📝';
+        const statusLabel = statusLabels[status] || 'Draft';
+            
+            // Format date untuk preview
+        let dateDisplay = 'Tanggal';
+        if (startDate && startTime && endDate && endTime) {
+            const startDateTime = new Date(`${startDate}T${startTime}`);
+            const endDateTime = new Date(`${endDate}T${endTime}`);
+            
+            dateDisplay = startDateTime.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            }) + ' ' + startDateTime.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit'
+            }) + ' - ' + endDateTime.toLocaleTimeString('id-ID', {
+                hour: '2-digit', 
+                minute: '2-digit'
+            });
+        }
+
+            document.getElementById('eventPreview').innerHTML = `
+            <div style="border: 1px solid #ddd; border-left: 5px solid var(--primary-color); border-radius: 8px; padding: 1.2rem; background: white;">
+                <h3 style="margin: 0 0 0.5rem 0; color: #333;">${title}</h3>
+                <p style="margin: 0 0 1rem 0; color: #666; font-size: 0.95rem;">${desc.substring(0, 120)}${desc.length > 120 ? '...' : ''}</p>
+                <div class="event-meta">
+                    <span>${categoryIcon} ${categoryLabel}</span>
+                    <span>📅 ${dateDisplay}</span>
+                    <span>📍 ${location.substring(0, 25)}${location.length > 25 ? '...' : ''}</span>
+                    <span>💰 ${price === '0' || price === '' ? 'Gratis' : 'Rp ' + parseInt(price).toLocaleString('id-ID')}</span>
+                    <span>${statusIcon} ${statusLabel}</span>
+                </div>
+            </div>
+        `;
+    }
+    
+
+        document.addEventListener('DOMContentLoaded', function() {
+        // 1. Otorisasi (HARUS PERTAMA)
+        const userJson = localStorage.getItem('user'); 
+        const token = localStorage.getItem('token');
+        const userData = userJson ? JSON.parse(userJson) : null;
+        
+        if (!userData || !token || userData.role !== 'ORGANIZER') {
+            alert('❌ Silakan login terlebih dahulu sebagai Organizer untuk mengakses halaman ini.');
+            window.location.href = 'login-organizer.html'; 
+            return; // Hentikan script jika gagal
+        }
+        
+        // Console log konfirmasi otorisasi
+        console.log(`✅ Otorisasi berhasil. Organizer: ${userData.fullName}`);
+
+        // 2. Setup Karakter Counter & Event Listeners (Yang sebelumnya ada di luar)
+        
+        // Character counters
+        document.getElementById('eventName').addEventListener('input', function() {
+            const count = this.value.length;
+            const counter = document.getElementById('nameCount');
+            counter.textContent = `${count}/100 karakter`;
+            if (count > 90) counter.classList.add('warning');
+            else counter.classList.remove('warning');
+            updatePreview();
+        });
+
+        document.getElementById('eventDescription').addEventListener('input', function() {
+            const count = this.value.length;
+            const counter = document.getElementById('descCount');
+            counter.textContent = `${count}/500 karakter`;
+            if (count > 450) counter.classList.add('warning');
+            else counter.classList.remove('warning');
+            updatePreview();
+        });
+
+        // Auto-set end date/time
+        document.getElementById('eventDate').addEventListener('change', function() {
+            const endDate = document.getElementById('endDate');
+            if (!endDate.value) {
+                endDate.value = this.value;
+            }
+            updatePreview();
+        });
+
+        document.getElementById('startTime').addEventListener('change', function() {
+            const endTime = document.getElementById('endTime');
+            if (!endTime.value) {
+                const [hours, minutes] = this.value.split(':');
+                let endHours = parseInt(hours) + 2;
+                if (endHours > 23) endHours = 23;
+                endTime.value = `${endHours.toString().padStart(2, '0')}:${minutes}`;
+            }
+            updatePreview();
+        });
+        
+        // Add event listeners for other preview updates
+        ['eventCategory', 'eventStatus', 'endDate', 'endTime', 'eventLocation', 'eventPrice'].forEach(id => {
+            const element = document.getElementById(id);
+            if(element) {
+                element.addEventListener('change', updatePreview);
+                element.addEventListener('input', updatePreview);
+            }
+        });
+
+        // 3. Setup Default Values (Yang sebelumnya ada di luar)
+
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('eventDate').min = today;
+        document.getElementById('endDate').min = today;
+
+        const nextHour = new Date();
+        nextHour.setHours(nextHour.getHours() + 1);
+        nextHour.setMinutes(0);
+        const defaultTime = nextHour.toTimeString().slice(0, 5);
+        
+        document.getElementById('startTime').value = defaultTime;
+        
+        let endHours = nextHour.getHours() + 2;
+        if (endHours > 23) endHours = 23;
+        const endTime = `${endHours.toString().padStart(2, '0')}:00`;
+        document.getElementById('endTime').value = endTime;
+
+        // Initialize preview
+        updatePreview();
+
+        // Debug: Check API functions
+        console.log('API functions:', {
+            apiPost: typeof apiPost,
+            register: typeof register,
+            login: typeof login
+        });
+    });
+
+    window.createNewEvent = async function() {
+    const token = localStorage.getItem('token');
+    const API_URL = LOCAL_API_BASE + '/events';
+
+    const startDate = document.getElementById('eventDate').value;
+    const startTime = document.getElementById('startTime').value;
+    const endDate = document.getElementById('endDate').value;
+    const endTime = document.getElementById('endTime').value;
+
+    if (!validateDateTime()) return;
+
+    const startDateTime = `${startDate}T${startTime}:00`;
+    const endDateTime = `${endDate}T${endTime}:00`;
+
+    const formData = {
+        title: document.getElementById('eventName').value,
+        description: document.getElementById('eventDescription').value,
+        category: document.getElementById('eventCategory').value,
+        startDate: startDateTime,
+        endDate: endDateTime,
+        location: document.getElementById('eventLocation').value,
+        status: document.getElementById('eventStatus').value
+    };
+
+    // add optional numeric / boolean / string fields expected by backend
+    formData.price = parseFloat(document.getElementById('eventPrice').value || 0);
+    const maxP = document.getElementById('maxParticipants').value;
+    formData.maxParticipants = maxP === '' ? null : parseInt(maxP, 10);
+    formData.tags = document.getElementById('eventTags').value || null;
+    formData.contactInfo = document.getElementById('contactInfo').value || null;
+    formData.requireApproval = document.getElementById('requireApproval').checked || false;
+
+    // Ambil ticket types yang dipilih
+    const ticketTypes = [];
+    if (document.getElementById('ticketRegular').checked) {
+        ticketTypes.push({
+            ticketType: 'REGULAR',
+            price: parseFloat(document.getElementById('priceRegular').value || 0),
+            quota: parseInt(document.getElementById('quotaRegular').value || 100, 10)
+        });
+    }
+    if (document.getElementById('ticketVip').checked) {
+        ticketTypes.push({
+            ticketType: 'VIP',
+            price: parseFloat(document.getElementById('priceVip').value || 0),
+            quota: parseInt(document.getElementById('quotaVip').value || 50, 10)
+        });
+    }
+    if (document.getElementById('ticketVvip').checked) {
+        ticketTypes.push({
+            ticketType: 'VVIP',
+            price: parseFloat(document.getElementById('priceVvip').value || 0),
+            quota: parseInt(document.getElementById('quotaVvip').value || 20, 10)
+        });
+    }
+    
+    // Validasi: minimal 1 tipe tiket harus dipilih
+    if (ticketTypes.length === 0) {
+        alert('❌ Pilih minimal 1 tipe tiket!');
+        return;
+    }
+    
+    formData.ticketTypes = ticketTypes;
+
+    try {
+        // Debug: decode JWT payload (tanpa verifikasi) untuk melihat subject/email
+        let decodedSubject = null;
+        try {
+            if (token) {
+                const parts = token.split('.');
+                if (parts.length === 3) {
+                    const payload = JSON.parse(atob(parts[1]));
+                    decodedSubject = payload.sub || payload.email || payload.subject || null;
+                    console.log('Decoded JWT payload:', payload);
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to decode token payload for debug:', e);
+        }
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const resText = await response.text();
+        if (response.ok) {
+            const data = JSON.parse(resText);
+            alert("✅ Event berhasil dibuat: " + data.title);
+            window.location.href = 'organizer.html';
+        } else {
+            console.error(resText);
+            // Try to parse JSON error body and show message
+            try {
+                const jsonErr = JSON.parse(resText);
+                const msg = jsonErr.message || jsonErr.error || JSON.stringify(jsonErr);
+                console.error('Create event failed. Token subject:', decodedSubject, 'Response:', jsonErr);
+                alert(`❌ Error ${response.status}: ${msg}\n(Token subject: ${decodedSubject || 'unknown'})`);
+            } catch (e) {
+                // Fallback to raw text
+                console.error('Create event failed. Token subject:', decodedSubject, 'Raw response:', resText);
+                alert(`❌ Error ${response.status}: ${resText}\n(Token subject: ${decodedSubject || 'unknown'})`);
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        alert("❌ Server error: " + error.message);
+    }
+}
+
+// --- PINDAHKAN KE LUAR ---
+window.validateDateTime = function() {
+    const start = document.getElementById("eventDate").value;
+    const end = document.getElementById("endDate").value;
+
+    if (!start || !end) {
+        alert("Tanggal mulai dan selesai wajib diisi!");
+        return false;
+    }
+
+    if (new Date(start) >= new Date(end)) {
+        alert("Tanggal mulai harus lebih kecil dari tanggal selesai!");
+        return false;
+    }
+    return true;
+}
+
+</script>
+</body>
+</html>

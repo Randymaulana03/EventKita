@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>EventKita — Login Organizer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 40%, #e3f2fd 100%);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* WRAPPER */
+    .auth-center {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* CARD */
+    .auth-card {
+      background: #ffffff;
+      padding: 40px 35px;
+      border-radius: 16px;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-card h2 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .muted {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 22px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #444;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    /* INPUTS */
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 14px;
+      border: 1.5px solid #dcdcdc;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      font-size: 0.95rem;
+      transition: 0.25s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #6f5bff;
+      box-shadow: 0 0 0 3px rgba(111, 91, 255, 0.2);
+    }
+
+    /* BUTTON */
+    .auth-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #6f5bff, #4be3ff);
+      color: white;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: 0.3s ease;
+      box-shadow: 0 4px 15px rgba(111, 91, 255, 0.3);
+    }
+
+    .auth-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(111, 91, 255, 0.4);
+    }
+
+    /* LINKS */
+    .auth-links {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .auth-links a {
+      color: #6f5bff;
+      font-weight: 500;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+
+    .auth-links a:hover {
+      text-decoration: underline;
+    }
+
+    #loginMsg {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 30px 25px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="auth-center">
+    <div class="auth-card">
+      <h2>Login Organizer</h2>
+      <p class="muted">Masuk sebagai organizer untuk mengelola event</p>
+
+      <label>Email</label>
+      <input id="loginEmail" type="email" placeholder="email@example.com">
+
+      <label>Password</label>
+      <input id="loginPassword" type="password" placeholder="password">
+
+      <input type="hidden" id="loginRole" value="ORGANIZER">
+
+      <button id="btnLogin" class="auth-btn">Login sebagai Organizer</button>
+      
+      <div class="auth-links">
+        <p class="muted">Belum punya akun? 
+          <a href="register-organizer.html">Register sebagai Organizer</a>
+        </p>
+        <p class="muted">Ingin login sebagai peserta?
+          <a href="login.html">Login sebagai Peserta</a>
+        </p>
+      </div>
+
+      <p id="loginMsg" class="muted"></p>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "http://localhost:8888/api";
+
+    async function doLogin(email, password, role) {
+      const response = await fetch(`${API_BASE}/auth/login/${role}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const res = await response.json();
+      if (!response.ok) throw new Error(res.error || res.message);
+      return res;
+    }
+
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+      const email = loginEmail.value;
+      const password = loginPassword.value;
+      const role = loginRole.value;
+      const msg = loginMsg;
+
+      if (!email || !password) {
+        msg.innerText = '❌ Email dan password harus diisi.';
+        return;
+      }
+
+      msg.innerText = 'Mohon tunggu...';
+
+      try {
+        const res = await doLogin(email, password, role);
+
+        localStorage.setItem('token', res.token);
+        localStorage.setItem('role', res.role);
+        localStorage.setItem('user', JSON.stringify(res));
+
+        msg.innerText = 'Login Berhasil! Tunggu Sebentar...';
+        setTimeout(() => window.location.href = 'organizer.html', 600);
+
+      } catch (error) {
+        msg.innerText = '❌ ' + error.message;
+      }
+    });
+  </script>
+
+</body>
+</html>

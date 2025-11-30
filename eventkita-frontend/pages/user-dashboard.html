@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <title>EventKita — User Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ----------------------------------------------
+           GLOBAL & FONT (Diambil dari tone desain)
+        ---------------------------------------------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            /* Transisi untuk efek halus */
+            transition: all .25s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            scroll-behavior: smooth;
+            /* Background yang lembut dari tone landing page */
+            background: #f7f8fc;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        /* ----------------------------------------------
+           TOPNAV (Gaya Nav Bar Scrolled & Logo)
+        ---------------------------------------------- */
+        .topnav {
+            width: 100%;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff; /* Putih bersih */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* Shadow lembut */
+            z-index: 100;
+        }
+
+        .nav-left, .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand {
+            font-size: 1.6rem;
+            font-weight: 700;
+            /* Warna primer EventKita */
+            color: #6f5bff; 
+        }
+
+        .role {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #666;
+            padding-left: 5px;
+        }
+
+        .username {
+            font-weight: 500;
+            color: #444;
+        }
+
+        /* Nav Buttons */
+        .nav-btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all .3s ease;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Tombol Notifikasi (seperti link navbar) */
+        .nav-btn:not(.logout-btn) {
+            background: transparent;
+            color: #333;
+            position: relative;
+        }
+
+        /* Tombol Logout (gaya CTA primer) */
+        .logout-btn {
+            background: #6f5bff;
+            color: white;
+            box-shadow: 0 3px 12px rgba(111,91,255,0.3);
+        }
+
+        .logout-btn:hover {
+            background: #5a49cc; /* Sedikit lebih gelap saat hover */
+            box-shadow: 0 5px 15px rgba(111,91,255,0.45);
+        }
+
+        /* Badge Notifikasi */
+        .notif-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background: #f44336; /* Warna merah standard untuk notifikasi */
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        /* ----------------------------------------------
+           CONTENT WRAPPER
+        ---------------------------------------------- */
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 40px auto 60px auto;
+            padding: 30px;
+            /* Gaya card utama dari tone desain */
+            background: #ffffff; 
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        }
+        
+        @media (max-width: 1240px) {
+            .content-wrapper {
+                margin: 20px;
+                padding: 20px;
+            }
+        }
+
+        /* ----------------------------------------------
+           DASHBOARD HEADER & TITLES
+        ---------------------------------------------- */
+        .dashboard-header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+
+        }
+
+        .dashboard-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #222;
+            
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 25px;
+            padding-top: 10px;
+        }
+
+        /* ----------------------------------------------
+           FILTERS (Form Style)
+        ---------------------------------------------- */
+        .filter-section {
+            margin-bottom: 40px;
+            background: #f7f8fc; /* Background lembut */
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-row select,
+        .filter-row input[type="date"],
+        .filter-row input[type="text"],
+        .filter-row input[placeholder] {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: #333;
+            flex-grow: 1;
+            max-width: 250px;
+        }
+
+        .filter-btn {
+            /* Menggunakan gaya tombol CTA yang lebih kecil */
+            padding: 10px 25px;
+            background: #6f5bff;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all .3s ease;
+            box-shadow: 0 3px 10px rgba(111,91,255,0.3);
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(111,91,255,0.45);
+        }
+
+        /* ----------------------------------------------
+           EVENTS GRID & CARD (Gaya Trending Card)
+        ---------------------------------------------- */
+        .events-section {
+            padding-top: 20px;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .event-card {
+            /* Gaya dari trending-card, dengan sedikit modifikasi agar lebih formal untuk dashboard */
+            background: #fff;
+            border: 1px solid #e6e6ff;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            transition: all .25s ease;
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+            border-color: #6f5bff50; /* Border sedikit berwarna ungu saat hover */
+        }
+
+        .event-card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #6f5bff; /* Warna primer */
+        }
+
+        .event-card p {
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .event-card p strong {
+            color: #333;
+        }
+
+        .card-actions {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px dashed #eee;
+        }
+
+        .card-actions button {
+            /* Gaya tombol View Details */
+            padding: 8px 20px;
+            background: transparent;
+            color: #6f5bff;
+            border: 2px solid #6f5bff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all .3s ease;
+        }
+
+        .card-actions button:hover {
+            background: #6f5bff;
+            color: white;
+            box-shadow: 0 4px 10px rgba(111,91,255,0.3);
+        }
+
+        /* ----------------------------------------------
+           RESPONSIVE
+        ---------------------------------------------- */
+        @media (max-width: 768px) {
+            .topnav {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-left, .nav-right {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .filter-row select,
+            .filter-row input[type="date"],
+            .filter-row input[placeholder] {
+                max-width: 100%;
+                flex-basis: 100%;
+            }
+
+            .filter-btn {
+                flex-basis: 100%;
+            }
+
+            .dashboard-title {
+                font-size: 1.8rem;
+            }
+            
+            .content-wrapper {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body onload="initUser()">
+
+    <nav class="topnav">
+        <div class="nav-left">
+            <span class="brand">EventKita</span> 
+            <span class="role">• <span id="userRole">User</span></span>
+        </div>
+
+        <div class="nav-right">
+            <span id="userName" class="username"></span>
+            <button class="nav-btn" onclick="location.href='notifications.html'" style="position:relative">
+                Notifikasi
+                <span id="notifBadge" class="notif-badge" style="display:none;"></span>
+            </button>
+            <button class="nav-btn logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="content-wrapper">
+
+        <header class="dashboard-header">
+            <h1 class="dashboard-title">Ready to Discover Amazing Events?</h1>
+        </header>
+
+        <section class="filter-section">
+            <div class="filter-row">
+                <select id="filterCategory">
+                    <option value="">Semua Kategori</option>
+                    <option value="CONCERT">Concert</option>
+                    <option value="CONFERENCE">Conference</option>
+                    <option value="WORKSHOP">Workshop</option>
+                    <option value="SEMINAR">Seminar</option>
+                    <option value="FESTIVAL">Festival</option>
+                    <option value="SPORTS">Sports</option>
+                    <option value="EXHIBITION">Exhibition</option>
+                    <option value="NETWORKING">Networking</option>
+                    <option value="OTHER">Other</option>
+                </select>
+
+                <input id="filterDate" type="date">
+                <input id="filterLocation" placeholder="Lokasi" type="text">
+
+                <button class="filter-btn" onclick="loadEvents()">Filter</button>
+            </div>
+        </section>
+
+        <section class="events-section">
+            <h2 class="section-title">Available Events</h2>
+            <div id="eventsGrid" class="events-grid"></div>
+        </section>
+
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/guard.js"></script>
+    <script src="../js/user.js"></script>
+
+    <script>
+        function initUser() {
+            // Check authentication and load username
+            const token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            if (!token || !userStr) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const user = JSON.parse(userStr);
+            const userName = user.fullName || user.name || user.username || 'User';
+            const userRole = user.role || 'PESERTA';
+
+            document.getElementById('userRole').textContent = userRole;
+            document.getElementById('userName').textContent = `Hello, ${userName}`;
+
+            loadEvents();
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('role');
+            window.location.href = 'login.html';
+        }
+
+    
+
+
+        async function loadEvents() {
+    try {
+        const params = new URLSearchParams();
+
+        const category = document.getElementById('filterCategory').value;
+        const date = document.getElementById('filterDate').value;
+        const location = document.getElementById('filterLocation').value.toLowerCase().trim();
+
+        // Hanya kirim category ke backend (backend support category filter)
+        if (category) params.append('category', category);
+
+        const raw = await apiGet('/events?' + params.toString());
+        console.log("API Response received, processing...");
+
+        // Pastikan kita punya array, fallback ke [] jika bukan array
+        let eventsArray = Array.isArray(raw) ? raw : (raw?.events || []);
+
+        // Bersihkan circular references dan ambil data penting saja
+        eventsArray = eventsArray.map(event => ({
+            id: event.id,
+            title: event.title,
+            description: event.description,
+            startDate: event.startDate,
+            endDate: event.endDate,
+            location: event.location,
+            category: event.category,
+            status: event.status,
+        }));
+
+        // Filter events yang statusnya PUBLISHED
+        eventsArray = eventsArray.filter(ev => ev.status === "PUBLISHED");
+
+        // Filter client-side untuk date dan location
+        if (date) {
+            const filterDate = new Date(date).toDateString();
+            eventsArray = eventsArray.filter(ev => {
+                if (!ev.startDate) return false;
+                const eventDate = new Date(ev.startDate).toDateString();
+                return eventDate === filterDate;
+            });
+        }
+
+        if (location) {
+            eventsArray = eventsArray.filter(ev => {
+                if (!ev.location) return false;
+                return ev.location.toLowerCase().includes(location);
+            });
+        }
+
+        console.log(`Filtered events: ${eventsArray.length} found`);
+        displayEvents(eventsArray);
+
+    } catch (error) {
+        console.error('Error loading events:', error);
+        document.getElementById('eventsGrid').innerHTML = `<p style="color: #f44336; padding: 20px;">Error loading events: ${error.message || 'Unknown error'}</p>`;
+    }
+}
+
+
+
+
+
+
+        function displayEvents(events) {
+            const grid = document.getElementById('eventsGrid');
+
+            if (!events || events.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">No events found matching your filters</p>';
+                return;
+            }
+
+            grid.innerHTML = events.map(event => `
+                <div class="event-card">
+                    <h3>${event.title || event.name || 'Event Title'}</h3>
+                    <p>${event.description || 'No description available'}</p>
+                    <p><strong>Date:</strong> ${formatDate(event.startDate)}</p>
+                    <p><strong>Location:</strong> ${event.location || 'Online'}</p>
+                    <p><strong>Category:</strong> ${event.category || 'N/A'}</p>
+
+                    <div class="card-actions">
+                        <button onclick="viewEvent(${event.id})">View Details</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewEvent(eventId) {
+            window.location.href = `event-detail.html?id=${eventId}`;
+        }
+
+        function registerEvent(eventId) {
+            // Redirect participant to event detail page where they can choose ticket and pay
+            window.location.href = `event-detail.html?id=${eventId}&mode=register`;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'TBA';
+            try {
+                return new Date(dateStr).toLocaleDateString('id-ID');
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
+        async function loadNotificationCount() {
+            try {
+                const data = await apiGet('/notifications/unread-count');
+                const count = data.count || 0;
+                const badge = document.getElementById('notifBadge');
+                if (count > 0) {
+                    badge.innerText = count > 99 ? '99+' : count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Failed to load notification count', err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initUser();
+            loadNotificationCount();
+        });
+    </script>
+
+</body>
+</html>

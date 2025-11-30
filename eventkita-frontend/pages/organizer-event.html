@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kelola Event</title>
+    <script src="js/api.js"></script>
+    <script src="js/guard.js"></script>
+</head>
+<body onload="init()">
+
+<h2>Buat Event</h2>
+
+<input id="name" placeholder="Nama Event">
+<textarea id="description" placeholder="Deskripsi"></textarea>
+<input id="price" type="number" placeholder="Harga tiket">
+<input id="quota" type="number" placeholder="Kuota tiket">
+<input id="date" type="datetime-local">
+
+<button onclick="createEvent()">Buat Event</button>
+
+<script>
+async function init() {
+    requireLogin();
+    if (localStorage.getItem("role") !== "ORGANIZER") {
+        alert("Akses ditolak");
+        window.location.href = "dashboard.html";
+    }
+}
+
+async function createEvent() {
+    const data = {
+        name: document.getElementById("name").value,
+        description: document.getElementById("description").value,
+        price: Number(document.getElementById("price").value),
+        quota: Number(document.getElementById("quota").value),
+        eventDate: document.getElementById("date").value
+    };
+
+    const res = await apiPost("/events/create", data, true);
+
+    if (res.error) return alert(res.error);
+
+    alert("Event berhasil dibuat!");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EventKita API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        button { margin: 5px; padding: 10px; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        #output { 
+            background: #f5f5f5; 
+            padding: 15px; 
+            margin-top: 20px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>EventKita API Testing</h1>
+    
+    <div class="test-section">
+        <h3>Connection Test</h3>
+        <button onclick="testConnection()">Test Connection to Spring Boot</button>
+        <button onclick="checkAPIObject()">Check API Object</button>
+    </div>
+
+    <div class="test-section">
+        <h3>Event Operations</h3>
+        <button onclick="getAllEvents()">Get All Events</button>
+        <button onclick="createTestEvent()">Create Test Event</button>
+        <button onclick="clearOutput()">Clear Output</button>
+    </div>
+
+    <div id="output">Output will appear here...</div>
+
+    <!-- Load api.js -->
+    <script src="js/api.js"></script>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            output.innerHTML += `<div class="${type}">[${timestamp}] ${message}</div>`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            output.innerHTML = 'Output cleared...';
+        }
+
+        // Check if API object is properly loaded
+        function checkAPIObject() {
+            log('Checking EventKitaAPI object...');
+            if (window.EventKitaAPI) {
+                log('✅ EventKitaAPI object found!', 'success');
+                log(`Methods available: ${Object.getOwnPropertyNames(Object.getPrototypeOf(window.EventKitaAPI)).join(', ')}`);
+            } else {
+                log('❌ EventKitaAPI object not found!', 'error');
+                log('Check browser console for errors loading api.js');
+            }
+        }
+
+        async function testConnection() {
+            log('Testing connection to Spring Boot...');
+            
+            // Check if API object exists
+            if (!window.EventKitaAPI) {
+                log('❌ EventKitaAPI not loaded. Check console for errors.', 'error');
+                return;
+            }
+
+            try {
+                const isConnected = await window.EventKitaAPI.testConnection();
+                if (isConnected) {
+                    log('✅ Connection successful! Spring Boot is running on port 8888.', 'success');
+                } else {
+                    log('❌ Connection failed! Spring Boot might not be running or CORS issue.', 'error');
+                    log('Make sure:');
+                    log('1. Spring Boot is running on port 8888');
+                    log('2. CORS is configured in Spring Boot');
+                    log('3. Check browser Network tab for details');
+                }
+            } catch (error) {
+                log(`❌ Connection error: ${error.message}`, 'error');
+                log('Possible issues:');
+                log('- Spring Boot not running');
+                log('- Wrong API endpoint');
+                log('- CORS blocking the request');
+            }
+        }
+
+        async function getAllEvents() {
+            log('Fetching all events...');
+            
+            if (!window.EventKitaAPI) {
+                log('❌ EventKitaAPI not loaded', 'error');
+                return;
+            }
+
+            try {
+                const events = await window.EventKitaAPI.getAllEvents();
+                log(`✅ Success! Found ${events.length} events:`, 'success');
+                log('<pre>' + JSON.stringify(events, null, 2) + '</pre>');
+            } catch (error) {
+                log(`❌ Error fetching events: ${error.message}`, 'error');
+            }
+        }
+
+        async function createTestEvent() {
+            const testEvent = {
+                name: "Test Event " + new Date().toLocaleTimeString(),
+                description: "This is a test event from frontend",
+                date: new Date().toISOString().split('T')[0], // Today's date
+                location: "Test Location",
+                maxParticipants: 50
+            };
+
+            log('Creating test event...');
+            log(`Event data: ${JSON.stringify(testEvent)}`);
+
+            if (!window.EventKitaAPI) {
+                log('❌ EventKitaAPI not loaded', 'error');
+                return;
+            }
+
+            try {
+                const createdEvent = await window.EventKitaAPI.createEvent(testEvent);
+                log('✅ Event created successfully:', 'success');
+                log('<pre>' + JSON.stringify(createdEvent, null, 2) + '</pre>');
+            } catch (error) {
+                log(`❌ Error creating event: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-check on page load
+        window.addEventListener('load', () => {
+            log('EventKita API Tester loaded');
+            setTimeout(() => {
+                checkAPIObject();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Organizer | EventKita</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-solid-rounded/css/uicons-solid-rounded.css">
+
+    <style>
+        :root {
+            --primary-color: #6a0dad; /* Ungu */
+            --secondary-color: #ff9900; /* Oranye */
+            --bg-light: #f4f7f9;
+            --text-dark: #333;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --danger-color: #dc3545;
+        }
+
+        button i {
+            font-size: 15px;   /* ukuran ikon */
+            
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* --- NAVIGASI --- */
+        .topnav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: white;
+            box-shadow: var(--card-shadow);
+            flex-wrap: wrap; /* Agar responsif lebih baik */
+        }
+
+        .nav-brand { font-size: 1.5rem; font-weight: bold; }
+        .nav-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .nav-btn, .logout-btn { 
+            padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s; 
+            font-weight: 500; border: none;
+        }
+
+        /* Gaya tombol di navbar */
+        .nav-actions .nav-btn:not(.logout-btn) { background: #e0e0e0; color: var(--text-dark); border: 1px solid #ccc; }
+        .nav-actions .nav-btn:not(.logout-btn):hover { background-color: #d0d0d0; }
+        .nav-actions .logout-btn { background: var(--danger-color); color: white; }
+        .nav-actions .logout-btn:hover { background-color: #d32f2f; }
+        .nav-actions .create-btn { background: var(--primary-color) !important; color: white !important; }
+        .nav-actions .validate-btn { background: var(--secondary-color) !important; color: white !important; }
+
+        .user-greeting { margin-right: 15px; font-weight: 600; color: var(--primary-color); }
+        .company-name { font-weight: 500; color: #666; margin-right: 15px; font-size: 0.9em; }
+
+        /* --- TATA LETAK UTAMA --- */
+        .container { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+        .dashboard-header {
+            margin-bottom: 2rem; padding: 1.5rem; background-color: white; 
+            border-radius: 12px; box-shadow: var(--card-shadow);
+        }
+        .user-welcome { font-size: 2rem; font-weight: 700; color: var(--primary-color); }
+        .user-subtitle { color: #666; margin-top: 0.5rem; }
+
+        /* --- STATISTIK --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        .stat-card {
+            background-color: white; padding: 1.5rem; border-radius: 12px;
+            box-shadow: var(--card-shadow); text-align: center; transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-number { font-size: 2.5rem; font-weight: bold; color: var(--secondary-color); display: block; margin-bottom: 0.5rem; }
+        .stat-label { font-weight: 600; color: var(--text-dark); }
+
+        /* --- QUICK ACTIONS --- */
+        .events-section { margin-top: 3rem; }
+        .section-title { font-size: 1.75rem; font-weight: 700; color: var(--primary-color); margin-bottom: 1.5rem; }
+        .quick-actions { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+        .action-btn {
+            flex: 1; min-width: 150px; background-color: white; color: var(--primary-color);
+            border: 2px solid var(--primary-color); padding: 1.5rem; border-radius: 12px;
+            text-align: center; cursor: pointer; font-weight: 600; transition: background-color 0.2s, color 0.2s;
+            display: flex; flex-direction: column; align-items: center; text-decoration: none;
+        }
+        .action-btn span:first-child { font-size: 2rem; margin-bottom: 0.5rem; }
+        .action-btn:hover { background-color: var(--primary-color); color: white; }
+
+        /* --- FILTER DAN DAFTAR EVENT --- */
+        .filter-row { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; }
+        .filter-row select, .filter-row button {
+            padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem;
+        }
+        .filter-row button { cursor: pointer; background-color: var(--primary-color); color: white; font-weight: 600; border: none; }
+        .filter-row button:hover { background-color: #580a96; }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .event-card {
+            background-color: white; padding: 1.5rem; border-radius: 12px;
+            box-shadow: var(--card-shadow); display: flex; flex-direction: column;
+        }
+        .event-description { color: #666; font-size: 0.9rem; margin-bottom: 1rem; flex-grow: 1; }
+        .event-meta p { margin: 0.5rem 0; font-size: 0.95rem; display: flex; align-items: center; }
+
+        /* Status Badges */
+        .event-status { font-size: 0.8rem; font-weight: bold; padding: 4px 8px; border-radius: 4px; }
+        .status-active { background-color: #d4edda; color: #155724; }
+        .status-ongoing { background-color: #cce5ff; color: #004085; }
+        .status-completed { background-color: #d1ecf1; color: #0c5460; }
+        .status-draft { background-color: #e2e3e5; color: #383d41; }
+        .status-cancelled { background-color: #f8d7da; color: #721c24; }
+
+        .event-actions { display: flex; gap: 8px; margin-top: 1rem; }
+        .event-actions button { flex: 1; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background-color 0.2s; }
+        .btn-primary { background-color: var(--primary-color); color: white; border: none; }
+        .btn-primary:hover { background-color: #580a96; }
+        .btn-secondary { background-color: #e0e0e0; color: var(--text-dark); border: 1px solid #ccc; }
+        .btn-secondary:hover { background-color: #d0d0d0; }
+
+        .no-events {
+            grid-column: 1 / -1; text-align: center; padding: 3rem; background-color: white;
+            border-radius: 12px; color: #888; font-size: 1.2rem; border: 2px dashed #ccc;
+        }
+
+        /* --- MODAL STYLE (Diambil dari halaman sebelumnya) --- */
+        .modal {
+            position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto; background-color: rgba(0, 0, 0, 0.4); display: none; 
+            align-items: center; justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe; padding: 20px; border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); max-width: 400px; width: 90%;
+            text-align: center;
+        }
+
+        .modal-buttons button {
+            margin: 10px 5px; padding: 10px 20px; border: none; border-radius: 8px;
+            cursor: pointer; font-weight: 600; transition: background-color 0.2s;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            .topnav { flex-direction: column; gap: 10px; }
+            .nav-actions { flex-wrap: wrap; justify-content: center; }
+            .container { padding: 1rem; }
+            .dashboard-header { padding: 1rem; }
+            .user-welcome { font-size: 1.5rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .quick-actions { flex-direction: column; }
+            .action-btn { width: 100%; }
+            .filter-row { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="topnav">
+        <div class="nav-brand">
+            <span style="color: var(--primary-color);">EventKita</span>
+            • <span id="userRole">ORGANIZER</span>
+        </div>
+        <div class="nav-actions">
+            <span id="userName" class="user-greeting"></span>
+            <span id="companyName" class="company-name"></span>
+            <button class="nav-btn" onclick="showModal('Notifikasi')">Notifikasi</button>
+            <button class="nav-btn create-btn" onclick="location.href='create-event.html'">➕ Buat</button>
+            <button class="nav-btn logout-btn" id="logoutButton">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <div class="user-welcome" id="welcomeMessage">Selamat Datang, Organizer!</div>
+            <div class="user-subtitle">Your Events, Your Insights</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-number" id="totalEvents">0</span>
+                <span class="stat-label">Total Event Saya</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="activeEvents">0</span>
+                <span class="stat-label">Event Aktif (Published)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="totalParticipants">0</span>
+                <span class="stat-label">Total Peserta</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="totalRevenue">Rp 0</span>
+                <span class="stat-label">Total Pendapatan Bersih</span>
+            </div>
+        </div>
+
+        <div class="events-section">
+            <div class="section-title">Quick Actions</div>
+            <div class="quick-actions">
+                <a class="action-btn" href="create-event.html">
+                    <span>➕</span>
+                    <span>Buat Event Baru</span>
+                </a>
+                <a class="action-btn" onclick="location.href='ticket-validation.html'">
+                    <span>🎫</span>
+                    <span>Validasi Tiket</span>
+                </a>
+                <a class="action-btn" onclick="loadMyEvents()">
+                    <span>🔄</span>
+                    <span>Refresh Event</span>
+                </a>
+                <a class="action-btn" onclick="showModal('Laporan')">
+                    <span>📊</span>
+                    <span>Laporan & Analitik</span>
+                </a>
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #ddd; margin: 3rem 0;">
+
+        <div class="events-section">
+            <div class="section-title">My Events</div>
+
+            <div class="filter-row">
+                <select id="filterStatus">
+                    <option value="">Semua Status</option>
+                    <option value="DRAFT">Draft</option>
+                    <option value="PUBLISHED">Aktif (PUBLISHED)</option>
+                    <option value="ONGOING">Sedang Berlangsung (ONGOING)</option>
+                    <option value="COMPLETED">Selesai</option>
+                    <option value="CANCELLED">Dibatalkan</option>
+                </select>
+                <!-- <button onclick="loadMyEvents()"> <i class="fi fi-bs-search"></i>Filter</button> -->
+                <button type="button" onclick="loadMyEvents()"><i class="fi fi-sr-search"></i></button>
+
+                <button onclick="clearFilters()">Reset</button>
+            </div>
+
+            <div id="myEventsGrid" class="events-grid">
+                <div class="no-events">
+                    Memuat event Anda...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <h4 id="modalTitle" style="color: var(--primary-color);">Peringatan</h4>
+            <p id="modalMessage" style="margin-bottom: 20px;">Anda yakin ingin keluar?</p>
+            <div class="modal-buttons">
+                <button id="modalConfirmBtn" style="background-color: var(--danger-color); color: white;">Keluar</button>
+                <button id="modalCancelBtn" style="background-color: #ccc;">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8888/api';
+
+        /**
+         * Fungsi API Get untuk semua panggilan terautentikasi.
+         */
+        async function apiGet(endpoint) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error("Token tidak ditemukan. Mengarahkan ke halaman login.");
+                throw new Error("TOKEN_MISSING");
+            }
+
+            const url = `${API_BASE_URL}${endpoint}`;
+            const maxRetries = 3;
+
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        return response.json();
+                    }
+
+                    const errorBody = await response.json().catch(() => ({ message: response.statusText }));
+                    console.error(`API Error ${response.status} for ${endpoint}:`, errorBody);
+
+                    if (response.status === 401 || response.status === 403) {
+                        throw new Error(`Auth Error ${response.status}: ${errorBody.message || response.statusText}`);
+                    }
+
+                    if (i < maxRetries - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); 
+                    } else {
+                        throw new Error(`API Error ${response.status}: ${errorBody.message || response.statusText}`);
+                    }
+                } catch (error) {
+                    if (error.message === "TOKEN_MISSING" || error.message.startsWith("Auth Error")) {
+                        throw error;
+                    }
+                    if (i === maxRetries - 1) {
+                        console.error(`Network or CORS error accessing: ${url}`, error);
+                        throw new Error(`Network Error: ${error.message}. Cek koneksi atau izin CORS.`);
+                    }
+                }
+            }
+        }
+
+        // --- Auth and Initialization ---
+
+        function initUser() {
+            const token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+
+            if (!token || !userStr) {
+                window.location.replace('login-organizer.html');
+                return;
+            }
+
+            try {
+                const user = JSON.parse(userStr);
+                const userName = user.fullName || user.username || 'Organizer';
+                const companyName = user.companyName || '';
+
+                document.getElementById('userRole').textContent = 'ORGANIZER';
+                document.getElementById('userName').textContent = `👋 ${userName}`;
+                document.getElementById('companyName').textContent = companyName ? `🏢 ${companyName}` : '';
+                document.getElementById('welcomeMessage').textContent = `Selamat Datang, ${userName}!`;
+
+                // Muat event dan statistik
+                loadMyEvents();
+            } catch (e) {
+                console.error("Gagal parse data user dari localStorage:", e);
+                localStorage.clear();
+                window.location.replace('login-organizer.html');
+            }
+        }
+
+        // --- Custom Modal Functions ---
+        const modal = document.getElementById('customModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+        function showModal(action) {
+            modalConfirmBtn.style.display = 'inline-block';
+            modalCancelBtn.textContent = 'Batal';
+            modalCancelBtn.onclick = () => modal.style.display = 'none';
+
+            if (action === 'Logout') {
+                modalTitle.textContent = 'Konfirmasi Logout';
+                modalMessage.innerHTML = 'Anda yakin ingin keluar dari akun ini?';
+                modalConfirmBtn.textContent = 'Ya, Keluar';
+                modalConfirmBtn.onclick = performLogout;
+            } else if (['Notifikasi', 'Peserta', 'Laporan'].includes(action)) {
+                modalTitle.textContent = 'Fitur Belum Tersedia';
+                modalMessage.innerHTML = `Halaman **${action}** saat ini masih dalam pengembangan.`;
+                modalConfirmBtn.style.display = 'none'; // Sembunyikan tombol konfirmasi
+                modalCancelBtn.textContent = 'Tutup';
+            }
+            modal.style.display = 'flex';
+        }
+
+        document.getElementById('logoutButton').addEventListener('click', () => showModal('Logout'));
+
+        function performLogout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('role');
+            window.location.replace('login-organizer.html');
+        }
+
+        // --- Data Loading and Display ---
+
+        async function loadMyEvents() {
+            const grid = document.getElementById('myEventsGrid');
+            grid.innerHTML = '<div class="no-events">Memuat event Anda...</div>';
+
+            const status = document.getElementById('filterStatus').value;
+            const query = status ? `?status=${status}` : '';
+
+            try {
+                // Endpoint: GET /api/events/my-events?status=...
+                const responseEvents = await apiGet(`/events/my-events${query}`);
+
+                displayMyEvents(responseEvents);
+                calculateAndDisplayStats(responseEvents);
+
+            } catch (error) {
+                console.error('Error loading my events:', error);
+
+                let errorMessage;
+                if (error.message.includes('TOKEN_MISSING') || error.message.includes('Auth Error 401')) {
+                    errorMessage = 'Sesi Anda habis. Silakan login kembali.';
+                    setTimeout(() => window.location.replace('login-organizer.html'), 2000);
+                } else if (error.message.includes('Auth Error 403')) {
+                    errorMessage = 'Anda tidak memiliki izin (Bukan Organizer).';
+                } else if (error.message.includes('Network Error')) {
+                    errorMessage = `Gagal terhubung ke API. Pastikan backend berjalan di ${API_BASE_URL} dan tidak ada masalah CORS.`;
+                } else {
+                    errorMessage = `Gagal memuat event. Detail: ${error.message}`;
+                }
+
+                grid.innerHTML = `<div class="no-events" style="color: var(--danger-color);">
+                    ❌ Error: ${errorMessage}
+                    <p style="font-size: 0.9rem; margin-top: 10px;">Cek konsol browser (F12) untuk detail teknis.</p>
+                </div>`;
+
+                calculateAndDisplayStats([]);
+            }
+        }
+
+        function calculateAndDisplayStats(responseEvents) {
+            if (!responseEvents || responseEvents.length === 0) {
+                updateStats({ totalEvents: 0, activeEvents: 0, totalParticipants: 0, totalRevenue: 0 });
+                return;
+            }
+
+            const totalEvents = responseEvents.length;
+            let activeEvents = 0;
+            let totalParticipants = 0;
+            let totalRevenue = 0;
+
+            responseEvents.forEach(item => {
+                const event = item.event || item || {};
+                const status = (typeof event.status === 'string') ? event.status : (event.status && event.status.name) ? event.status.name : null;
+                
+                if (status === 'PUBLISHED') {
+                    activeEvents++;
+                }
+
+                const cp = event.totalParticipants || event.currentParticipants || 0;
+                totalParticipants += cp;
+
+                totalRevenue += event.revenueBersih || item.revenueBersih || 0;
+            });
+
+            updateStats({ totalEvents, activeEvents, totalParticipants, totalRevenue });
+        }
+
+        function updateStats(stats) {
+            document.getElementById('totalEvents').textContent = stats.totalEvents || 0;
+            document.getElementById('activeEvents').textContent = stats.activeEvents || 0;
+            document.getElementById('totalParticipants').textContent = stats.totalParticipants || 0;
+
+            const formattedRevenue = stats.totalRevenue ? `Rp ${parseInt(stats.totalRevenue).toLocaleString('id-ID')}` : 'Rp 0';
+            document.getElementById('totalRevenue').textContent = formattedRevenue;
+        }
+
+        function displayMyEvents(responseEvents) {
+            const grid = document.getElementById('myEventsGrid');
+
+            if (!responseEvents || responseEvents.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-events">
+                        📭 Belum ada event
+                        <p style="margin-top: 1rem; font-size: 0.9rem;">
+                            <a href="create-event.html" style="color: var(--primary-color); text-decoration: none; font-weight: bold;">
+                                Buat event pertama Anda sekarang!
+                            </a>
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = responseEvents.map(item => {
+                const event = item.event || item || {};
+                const currentParticipants = event.currentParticipants || event.bookings?.length || 0;
+                const eventId = event.id || item.id;
+                const eventStatus = (typeof event.status === 'string') ? event.status : (event.status && event.status.name) ? event.status.name : 'DRAFT';
+
+                return `
+                <div class="event-card">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <h3 style="margin: 0; font-size: 1.25rem;">${event.title || 'Event Tanpa Nama'}</h3>
+                        <span class="event-status ${getStatusClass(eventStatus)}">${getStatusText(eventStatus)}</span> 
+                    </div>
+                    
+                    <p class="event-description">${((event.description || 'Tidak ada deskripsi') + '').substring(0, 80)}${event.description && event.description.length > 80 ? '...' : ''}</p>
+                    
+                    <div class="event-meta">
+                        <p>📅 ${formatDate(event.startDate) || 'Tanggal TBA'}</p> 
+                        <p>📍 ${event.location || 'Online'}</p> 
+                        <p>👥 ${currentParticipants}/${event.maxParticipants || '∞'} peserta</p>
+                        <p>💰 ${event.price && event.price > 0 ? `Rp ${parseInt(event.price).toLocaleString('id-ID')}` : 'Gratis'}</p>
+                    </div>
+                    
+                    <div class="event-actions">
+                        <button class="btn-secondary" onclick="viewEvent('${eventId}')">Detail</button>
+                        <button class="btn-primary" onclick="editEvent('${eventId}')">Edit</button>
+                        <button class="btn-secondary" onclick="viewParticipants('${eventId}')">Peserta</button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function getStatusClass(status) {
+            const statusClasses = {
+                'PUBLISHED': 'status-active',
+                'ONGOING': 'status-ongoing',
+                'COMPLETED': 'status-completed',
+                'DRAFT': 'status-draft',
+                'CANCELLED': 'status-cancelled'
+            };
+            return statusClasses[status] || 'status-draft';
+        }
+
+        function getStatusText(status) {
+            const statusTexts = {
+                'PUBLISHED': 'Aktif',
+                'ONGOING': 'Sedang Berlangsung',
+                'COMPLETED': 'Selesai',
+                'DRAFT': 'Draft',
+                'CANCELLED': 'Dibatalkan'
+            };
+            return statusTexts[status] || 'Draft';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            try {
+                return new Date(dateString).toLocaleDateString('id-ID', options);
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('filterStatus').value = '';
+            loadMyEvents();
+        }
+
+        function viewEvent(eventId) {
+            window.location.href = `event-detail.html?id=${eventId}`;
+        }
+
+        function editEvent(eventId) {
+            window.location.href = `edit-event.html?id=${eventId}`;
+        }
+
+        function viewParticipants(eventId) {
+            window.location.href = `event-participants.html?id=${eventId}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', initUser);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>EventKita — Register Organizer</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Inter", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #e7f1ff 0%, #f5f9ff 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 440px;
+      padding: 32px;
+      border-radius: 18px;
+      box-shadow: 0px 8px 22px rgba(0, 42, 115, 0.12);
+      animation: fadeIn 0.45s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      font-weight: 700;
+      color: #0d47a1;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .muted {
+      text-align: center;
+      font-size: 14px;
+      color: #5a5a5a;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+      color: #073e7b;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px 14px;
+      margin-bottom: 16px;
+      border-radius: 10px;
+      border: 1px solid #cfd8e8;
+      transition: 0.2s ease;
+      font-size: 15px;
+    }
+    input:focus {
+      border-color: #0d47a1;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(33, 107, 255, 0.18);
+    }
+
+    #btnRegister {
+      width: 100%;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #0d47a1;
+      color: white;
+      transition: 0.25s;
+      margin-top: 10px;
+    }
+    #btnRegister:hover {
+      background: #0a3782;
+      transform: translateY(-2px);
+    }
+
+    .auth-links {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .auth-links a {
+      color: #0d47a1;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .auth-links a:hover {
+      text-decoration: underline;
+    }
+
+    #regMsg {
+      margin-top: 12px;
+      color: #c62828;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 26px;
+      }
+      h2 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="auth-card">
+    <h2>Daftar Sebagai Organizer</h2>
+    <p class="muted">Buat dan kelola event profesional bersama EventKita</p>
+
+    <label>Full Name *</label>
+    <input id="regFullName" type="text" placeholder="Nama lengkap kamu">
+
+    <label>Email *</label>
+    <input id="regEmail" type="email" placeholder="email@example.com">
+
+    <label>Username *</label>
+    <input id="regUsername" type="text" placeholder="username unik">
+
+    <label>Password *</label>
+    <input id="regPassword" type="password" placeholder="minimal 6 karakter">
+
+    <label>Company Name *</label>
+    <input id="regCompany" type="text" placeholder="Nama perusahaan / organisasi">
+
+    <button id="btnRegister">Daftar sebagai Organizer</button>
+
+    <div class="auth-links">
+      <p class="muted">Sudah punya akun? <a href="login-organizer.html">Login sebagai Organizer</a></p>
+      <p class="muted">Ingin jadi Peserta? <a href="register.html">Daftar sebagai Peserta</a></p>
+    </div>
+
+    <p id="regMsg"></p>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+      document.getElementById('btnRegister').addEventListener('click', async () => {
+        const body = {
+          fullName:   document.getElementById('regFullName').value,
+          email:      document.getElementById('regEmail').value,
+          username:   document.getElementById('regUsername').value,
+          password:   document.getElementById('regPassword').value,
+          companyName: document.getElementById('regCompany').value
+        };
+
+        if (!body.fullName || !body.email || !body.username || !body.password || !body.companyName) {
+          regMsg.innerText = 'Semua field harus diisi.';
+          return;
+        }
+
+        if (body.password.length < 6) {
+          regMsg.innerText = 'Password minimal 6 karakter.';
+          return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(body.email)) {
+          regMsg.innerText = 'Format email tidak valid.';
+          return;
+        }
+
+        try {
+          regMsg.innerText = 'Mendaftarkan...';
+          const res = await register('ORGANIZER', body);
+
+          if (res.error) {
+            regMsg.innerText = res.error;
+            return;
+          }
+
+          alert('Registrasi berhasil! Silakan login sebagai Organizer.');
+          window.location.href = 'login-organizer.html';
+        }
+        catch (error) {
+          regMsg.innerText = 'Pendaftaran gagal: ' + error.message;
+        }
+      });
+
+      document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          document.getElementById('btnRegister').click();
+        }
+      });
+
+    });
+  </script>
+
+</body>
+</html>
