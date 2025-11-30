@@ -35,3 +35,7 @@
       -  PaymentServiceImpl.publishPaymentEvent() dipanggil = kirim event PaymentEvent
       -  Listener PaymentNotificationListener otomatis menangkap event (@EventListener)
     Notifikasi dikirim ke: User = pembayaran berhasil
+
+
+
+link presentasi: https://youtu.be/0Hz6ZDI3htM
